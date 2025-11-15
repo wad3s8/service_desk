@@ -1,0 +1,11 @@
+package com.wad3s.service_desk.repo;
+
+
+import com.wad3s.service_desk.domain.Role;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface RoleRepository extends JpaRepository<Role, Long> {
+    Optional<Role> findByName(String name);
+}
