@@ -1,8 +1,9 @@
-package com.wad3s.service_desk.security;
+package com.wad3s.service_desk.security.jwt;
 
 
 import com.wad3s.service_desk.domain.User;
-import com.wad3s.service_desk.repo.UserRepository;
+import com.wad3s.service_desk.repository.UserRepository;
+import com.wad3s.service_desk.service.JwtService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -1,8 +1,8 @@
 package com.wad3s.service_desk.controller;
 
 import com.wad3s.service_desk.domain.User;
-import com.wad3s.service_desk.repo.RoleRepository;
-import com.wad3s.service_desk.repo.UserRepository;
+import com.wad3s.service_desk.repository.RoleRepository;
+import com.wad3s.service_desk.repository.UserRepository;
 import com.wad3s.service_desk.service.AuthService;
 import com.wad3s.service_desk.dto.LoginRequest;
 import com.wad3s.service_desk.dto.TokenResponse;

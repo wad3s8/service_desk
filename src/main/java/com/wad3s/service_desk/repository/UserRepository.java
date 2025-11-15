@@ -1,4 +1,4 @@
-package com.wad3s.service_desk.repo;
+package com.wad3s.service_desk.repository;
 
 import com.wad3s.service_desk.domain.User;
 import org.springframework.data.jpa.repository.EntityGraph;

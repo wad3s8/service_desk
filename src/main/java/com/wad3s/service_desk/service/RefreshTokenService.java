@@ -2,7 +2,7 @@ package com.wad3s.service_desk.service;
 
 import com.wad3s.service_desk.domain.RefreshToken;
 import com.wad3s.service_desk.domain.User;
-import com.wad3s.service_desk.repo.RefreshTokenRepository;
+import com.wad3s.service_desk.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

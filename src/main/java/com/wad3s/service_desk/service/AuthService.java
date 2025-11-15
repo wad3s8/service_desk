@@ -1,10 +1,9 @@
 package com.wad3s.service_desk.service;
 
 
-import com.wad3s.service_desk.common.CookieHelper;
+import com.wad3s.service_desk.security.jwt.JwtCookieHelper;
 import com.wad3s.service_desk.domain.User;
-import com.wad3s.service_desk.repo.UserRepository;
-import com.wad3s.service_desk.security.JwtService;
+import com.wad3s.service_desk.repository.UserRepository;
 import com.wad3s.service_desk.dto.TokenResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +22,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
-    private final CookieHelper cookieHelper;
+    private final JwtCookieHelper jwtCookieHelper;
 
     @Value("${app.jwt.refresh-ttl-days}")
     private long refreshTtlDays;
@@ -50,7 +49,7 @@ public class AuthService {
 
         // выдать и сохранить refresh (в БД хранится только хэш), поставить HttpOnly cookie
         String rawRefresh = refreshTokenService.issueAndStore(u, ua, ip);
-        cookieHelper.setRefreshCookie(res, rawRefresh, refreshTtlDays);
+        jwtCookieHelper.setRefreshCookie(res, rawRefresh, refreshTtlDays);
 
         // сгенерить короткий access
         String access = jwtService.generateAccess(u);
@@ -61,7 +60,7 @@ public class AuthService {
 
     /** Обновить access по refresh-куке (ротация refresh внутри). */
     public TokenResponse refresh(HttpServletRequest req, HttpServletResponse res) {
-        String raw = cookieHelper.readRefreshCookie(req)
+        String raw = jwtCookieHelper.readRefreshCookie(req)
                 .orElseThrow(() -> new RuntimeException("No refresh cookie"));
 
         String ua = Optional.ofNullable(req.getHeader("User-Agent")).orElse("");
@@ -72,7 +71,7 @@ public class AuthService {
 
         // выдаём новый refresh и ставим новую HttpOnly cookie
         String newRaw = refreshTokenService.issueAndStore(user, ua, ip);
-        cookieHelper.setRefreshCookie(res, newRaw, refreshTtlDays);
+        jwtCookieHelper.setRefreshCookie(res, newRaw, refreshTtlDays);
 
         // новый access
         String access = jwtService.generateAccess(user);
@@ -86,6 +85,6 @@ public class AuthService {
         if (currentUser != null) {
             refreshTokenService.revokeAll(currentUser);
         }
-        cookieHelper.clearRefreshCookie(res);
+        jwtCookieHelper.clearRefreshCookie(res);
     }
 }

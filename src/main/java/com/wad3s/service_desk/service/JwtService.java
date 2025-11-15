@@ -1,4 +1,4 @@
-package com.wad3s.service_desk.security;
+package com.wad3s.service_desk.service;
 
 import com.wad3s.service_desk.domain.Role;
 import com.wad3s.service_desk.domain.User;

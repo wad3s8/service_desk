@@ -1,4 +1,4 @@
-package com.wad3s.service_desk.common;
+package com.wad3s.service_desk.security.jwt;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +13,7 @@ import java.util.Optional;
 import jakarta.servlet.http.Cookie;
 
 @Component
-public class CookieHelper {
+public class JwtCookieHelper {
 
     // dev: false (на localhost без https)
     // prod: true  (обязательно на https)
