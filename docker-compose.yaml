@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16
+    container_name: service_desk_db
+    environment:
+      POSTGRES_DB: service_desk
+      POSTGRES_USER: service_desk
+      POSTGRES_PASSWORD: 12345
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U service_desk -d service_desk"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: service_desk_app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # здесь переопределяем URL на "db", а не localhost
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/service_desk
+      SPRING_DATASOURCE_USERNAME: service_desk
+      SPRING_DATASOURCE_PASSWORD: 12345
+
+      # лучше секрет вынести в env, а не жёстко в yaml
+      APP_JWT_SECRET: "3QxQ5LjPphGaZxVM2xvuPDVibED5A35H/7yRDrYwoZb9aNqJjuyB8s7egDfji8WGJVd+HlKrthUP94vjq10meQ=="
+
+      # по желанию
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  db-data:

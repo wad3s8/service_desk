@@ -4,7 +4,7 @@ server:
 app:
   jwt:
     issuer: service-desk
-    secret: "3QxQ5LjPphGaZxVM2xvuPDVibED5A35H/7yRDrYwoZb9aNqJjuyB8s7egDfji8WGJVd+HlKrthUP94vjq10meQ=="
+    secret: ${APP_JWT_SECRET:3QxQ5LjPphGaZxVM2xvuPDVibED5A35H/7yRDrYwoZb9aNqJjuyB8s7egDfji8WGJVd+HlKrthUP94vjq10meQ==}
     access-ttl-min: 10
     refresh-ttl-days: 14
 
@@ -22,9 +22,9 @@ spring:
       allow-credentials: true
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/service_desk
-    username: service_desk
-    password: 12345
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/service_desk}
+    username: ${SPRING_DATASOURCE_USERNAME:service_desk}
+    password: ${SPRING_DATASOURCE_PASSWORD:12345}
 
   jpa:
     hibernate:
