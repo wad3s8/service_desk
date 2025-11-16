@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -27,39 +26,68 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest req,
-                                    HttpServletResponse res,
+    protected boolean shouldNotFilter(HttpServletRequest req) {
+        String p = req.getRequestURI();
+        return p.startsWith("/auth/")
+                || p.startsWith("/swagger-ui/")
+                || p.startsWith("/v3/api-docs")
+                || p.equals("/actuator/health")
+                || "OPTIONS".equalsIgnoreCase(req.getMethod());
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
 
-        String path = req.getRequestURI();
-        // пропускаем публичные эндпоинты авторизации и статик/actuator по желанию
-        if (path.startsWith("/auth/") || "OPTIONS".equalsIgnoreCase(req.getMethod())) {
-            chain.doFilter(req, res);
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+
+        System.out.println("JwtAuthFilter: " + method + " " + path);
+
+        // пропускаем публичные эндпоинты, swagger и preflight
+        if (path.startsWith("/auth/")
+                || path.startsWith("/swagger-ui/")
+                || path.startsWith("/v3/api-docs")
+                || "OPTIONS".equalsIgnoreCase(method)) {
+
+            System.out.println("JwtAuthFilter: skip " + path);
+            chain.doFilter(request, response);
             return;
         }
 
-        String header = req.getHeader("Authorization");
+        String header = request.getHeader("Authorization");
+        System.out.println("JwtAuthFilter: Authorization = " + header);
+
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
             try {
                 Long userId = jwtService.extractUserId(token);
+                System.out.println("JwtAuthFilter: userId = " + userId);
 
-                // грузим пользователя с ролями
-                User user = userRepository.findById(userId).orElse(null);
+                User user = userRepository.findByIdWithRoles(userId).orElse(null);
+                System.out.println("JwtAuthFilter: user = " + user);
+
                 if (user != null && user.isEnabled() && !user.isLocked()) {
-                    List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
+                    var authorities = user.getRoles().stream()
                             .map(r -> new SimpleGrantedAuthority("ROLE_" + r.getName()))
                             .toList();
 
                     var auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(auth);
+                    System.out.println("JwtAuthFilter: authenticated as " + user.getEmail());
+                } else {
+                    System.out.println("JwtAuthFilter: user not found/disabled/locked");
                 }
             } catch (JwtException | IllegalArgumentException e) {
-                // не валидный/просроченный токен — считаем как неаутентифицированный
+                System.out.println("JwtAuthFilter: invalid token: " + e.getMessage());
                 SecurityContextHolder.clearContext();
             }
+        } else {
+            System.out.println("JwtAuthFilter: no Bearer token");
         }
 
-        chain.doFilter(req, res);
+        chain.doFilter(request, response);
     }
+
 }

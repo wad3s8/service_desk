@@ -39,24 +39,28 @@ public class User {
     @Column(length = 100)
     private String lastName;
 
+    // location entity
     @Column(length = 255)
     private String workplace;
 
     @Column(length = 100)
     private String position;
 
-
     @Pattern(regexp = "^[+\\d][\\d\\s()\\-]{6,30}$",
             message = "Некорректный номер телефона")
     @Column(length = 32)
     private String phone;
 
-    // Статус
+    // Spring Security isEnabled разобраться
     @Column(nullable = false)
     private boolean enabled = true;
 
+    // Spring Security isEnabled разобраться
     @Column(nullable = false)
     private boolean locked = false;
+
+    @Column(nullable = false)
+    private boolean is_admin = false;
 
     // Роли
     @ManyToMany(fetch = FetchType.LAZY)

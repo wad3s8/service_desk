@@ -27,33 +27,32 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    //пока открыто все filterChain
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain openAll(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsSource()))
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
+                .cors(cors -> cors.disable())
+                .authorizeHttpRequests(a -> a.anyRequest().permitAll());
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsSource() {
         var cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(List.of("http://localhost:3000"));
+        // пускаем локалку на любых портах (и 8080 для Swagger, и 3000 для фронта)
+        cfg.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
+        cfg.setAllowCredentials(true); // у тебя refresh-куки — это ок
         cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-        cfg.setAllowedHeaders(List.of("Authorization","Content-Type"));
-        cfg.setAllowCredentials(true); // для refresh-куки
+        cfg.setAllowedHeaders(List.of("*"));
+        cfg.setExposedHeaders(List.of("Authorization"));
+        cfg.setMaxAge(3600L);
+
         var src = new UrlBasedCorsConfigurationSource();
         src.registerCorsConfiguration("/**", cfg);
         return src;
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }

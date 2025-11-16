@@ -1,0 +1,31 @@
+package com.wad3s.service_desk.domain;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "categories")
+@Getter
+@Setter
+@NoArgsConstructor
+public class Category {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank
+    @Size(max = 100)
+    @Column(nullable = false, unique = true, length = 100)
+    private String name;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Subcategory> subcategories = new HashSet<>();
+}
