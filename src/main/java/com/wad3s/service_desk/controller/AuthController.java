@@ -1,5 +1,6 @@
 package com.wad3s.service_desk.controller;
 
+import com.wad3s.service_desk.domain.Role;
 import com.wad3s.service_desk.domain.User;
 import com.wad3s.service_desk.repository.RoleRepository;
 import com.wad3s.service_desk.repository.UserRepository;
@@ -11,9 +12,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 @RestController
 @RequestMapping("/auth")
@@ -24,15 +28,20 @@ public class AuthController {
     private final UserRepository users;
     private final RoleRepository roles;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     /** Простая регистрация по email+password. */
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody @Valid LoginRequest req) {
         if (users.existsByEmail(req.email())) return ResponseEntity.status(409).build();
 
+        Role customerRole = roleRepository.findByName("customer")
+                .orElseThrow(() -> new IllegalStateException("Role CUSTOMER not found in DB"));
+
         var u = new User();
         u.setEmail(req.email());
         u.setPasswordHash(passwordEncoder.encode(req.password()));
+        u.setRoles(Set.of(customerRole));
         u.setEnabled(true);
         u.setLocked(false);
         // если в БД есть роль "Пользователь" — назначим
@@ -42,7 +51,6 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    /** Логин: ставим HttpOnly refresh-куку и возвращаем access. */
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@RequestBody @Valid LoginRequest req,
                                                HttpServletRequest httpReq,

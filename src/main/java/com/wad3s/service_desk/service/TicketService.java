@@ -1,10 +1,7 @@
 package com.wad3s.service_desk.service;
 
 import com.wad3s.service_desk.domain.*;
-import com.wad3s.service_desk.dto.ticket.TicketCreateDto;
-import com.wad3s.service_desk.dto.ticket.TicketDto;
-import com.wad3s.service_desk.dto.ticket.TicketMapper;
-import com.wad3s.service_desk.dto.ticket.TicketUpdateDto;
+import com.wad3s.service_desk.dto.ticket.*;
 import com.wad3s.service_desk.repository.SubcategoryRepository;
 import com.wad3s.service_desk.repository.TicketRepository;
 import com.wad3s.service_desk.repository.UserRepository;
@@ -27,6 +24,54 @@ public class TicketService {
     private final SubcategoryRepository subcategoryRepository;
     private final UserRepository userRepository;
     private final CurrentUserService currentUserService;
+
+    public Page<Ticket> getTicketsForAssignee(Long assigneeId, Pageable pageable) {
+        return ticketRepository.findByAssigneeId(assigneeId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Ticket getTicketForExecutor(Long ticketId, Long executorId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found: " + ticketId));
+
+        if (ticket.getAssignee() == null ||
+                !ticket.getAssignee().getId().equals(executorId)) {
+            throw new AccessDeniedException("Ticket is not assigned to current executor");
+        }
+
+        return ticket;
+    }
+
+    @Transactional
+    public Ticket updateTicketForExecutor(Long ticketId,
+                                          Long executorId,
+                                          ExecutorUpdateTicketRequest request) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found: " + ticketId));
+
+        if (ticket.getAssignee() == null ||
+                !ticket.getAssignee().getId().equals(executorId)) {
+            throw new AccessDeniedException("Ticket is not assigned to current executor");
+        }
+
+        // частичное обновление
+        if (request.status() != null) {
+            ticket.setStatus(request.status());
+
+            // тут, при желании, можешь добавить логику установки resolvedAt
+            // если статус перешёл в "RESOLVED"/"CLOSED" и т.п.
+        }
+
+        if (request.priority() != null) {
+            ticket.setPriority(request.priority());
+        }
+
+        if (request.location() != null) {
+            ticket.setLocation(request.location());
+        }
+
+        return ticketRepository.save(ticket);
+    }
 
     @Transactional
     public TicketDto create(TicketCreateDto dto) {

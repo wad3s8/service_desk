@@ -9,12 +9,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tickets")
+@RequestMapping("/customer/tickets")
 @RequiredArgsConstructor
 public class TicketController {
 
@@ -22,11 +23,13 @@ public class TicketController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('customer')")
     public TicketDto create(@Valid @RequestBody TicketCreateDto dto) {
         return ticketService.create(dto);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('customer')")
     public TicketDto update(
             @PathVariable Long id,
             @Valid @RequestBody TicketUpdateDto dto
@@ -35,6 +38,7 @@ public class TicketController {
     }
 
     @GetMapping("/my")
+    @PreAuthorize("hasAnyRole('customer')")
     public List<TicketDto> getMyTickets(Pageable pageable) {
         return ticketService.getMyTickets();
     }
