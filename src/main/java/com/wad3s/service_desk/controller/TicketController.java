@@ -6,7 +6,6 @@ import com.wad3s.service_desk.dto.ticket.TicketUpdateDto;
 import com.wad3s.service_desk.service.TicketService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
