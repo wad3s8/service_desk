@@ -2,15 +2,19 @@ package com.wad3s.service_desk.controller;
 
 import com.wad3s.service_desk.domain.Role;
 import com.wad3s.service_desk.domain.User;
+import com.wad3s.service_desk.dto.user.RegisterRequest;
+import com.wad3s.service_desk.exception.EmailAlreadyExistsException;
 import com.wad3s.service_desk.repository.RoleRepository;
 import com.wad3s.service_desk.repository.UserRepository;
 import com.wad3s.service_desk.service.AuthService;
-import com.wad3s.service_desk.dto.LoginRequest;
+import com.wad3s.service_desk.dto.user.LoginRequest;
 import com.wad3s.service_desk.dto.TokenResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,23 +35,27 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody @Valid LoginRequest req) {
-        if (users.existsByEmail(req.email())) return ResponseEntity.status(409).build();
+    public ResponseEntity<Void> register(@RequestBody @Valid RegisterRequest request) {
+
 
         Role customerRole = roleRepository.findByName("customer")
                 .orElseThrow(() -> new IllegalStateException("Role CUSTOMER not found in DB"));
 
         var u = new User();
-        u.setEmail(req.email());
-        u.setPasswordHash(passwordEncoder.encode(req.password()));
+        u.setEmail(request.email());
+        u.setPasswordHash(passwordEncoder.encode(request.password()));
         u.setRoles(Set.of(customerRole));
+        u.setFirstName(request.name());
+        u.setLastName(request.lastName());
         u.setEnabled(true);
         u.setLocked(false);
-        // если в БД есть роль "Пользователь" — назначим
-        roles.findByName("Пользователь").ifPresent(u.getRoles()::add);
 
-        users.save(u);
-        return ResponseEntity.ok().build();
+        try {
+            users.save(u);
+        } catch (DataIntegrityViolationException e) {
+            throw new EmailAlreadyExistsException();
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/login")
@@ -56,6 +64,7 @@ public class AuthController {
                                                HttpServletResponse httpRes) {
         return ResponseEntity.ok(authService.login(req.email(), req.password(), httpReq, httpRes));
     }
+
 
     /** Рефреш access по refresh-куке (ротация refresh внутри). */
     @PostMapping("/refresh")

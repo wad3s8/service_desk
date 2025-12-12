@@ -1,4 +1,4 @@
-package com.wad3s.service_desk.dto;
+package com.wad3s.service_desk.dto.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
