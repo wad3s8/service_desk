@@ -39,9 +39,12 @@ public class User {
     @Column(length = 100)
     private String lastName;
 
-    // location entity
-    @Column(length = 255)
-    private String workplace;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "location_id",
+            foreignKey = @ForeignKey(name = "fk_user_location")
+    )
+    private Location location;
 
     @Column(length = 100)
     private String position;

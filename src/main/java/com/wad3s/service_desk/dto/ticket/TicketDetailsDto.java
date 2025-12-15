@@ -5,21 +5,31 @@ import com.wad3s.service_desk.domain.TicketStatus;
 
 import java.time.Instant;
 
-public record TicketDto(
+public record TicketDetailsDto(
         Long id,
         String title,
+
+        TicketStatus status,
+        TicketPriority priority,
 
         Long locationId,
         String locationName,
 
-        Long subcategoryId,
-        String subcategoryName,
-
         Long categoryId,
         String categoryName,
 
-        TicketPriority priority,
-        TicketStatus status,
+        Long subcategoryId,
+        String subcategoryName,
+
+        Long requesterId,
+        String requesterName,
+
+        Long assigneeId,
+        String assigneeName,
+
+        Long assignedTeamId,
+        String assignedTeamName,
+
         String description,
 
         Instant createdAt,

@@ -1,5 +1,6 @@
 package com.wad3s.service_desk.dto.ticket;
 
+import com.wad3s.service_desk.domain.Location;
 import com.wad3s.service_desk.domain.TicketPriority;
 import com.wad3s.service_desk.domain.TicketStatus;
 import jakarta.validation.constraints.Size;
@@ -11,8 +12,7 @@ public record TicketUpdateDto(
         @Size(max = 255)
         String title,
 
-        @Size(max = 255)
-        String location,
+        Location location,
 
         Long subcategoryId,
 

@@ -3,7 +3,8 @@ package com.wad3s.service_desk.controller;
 import com.wad3s.service_desk.domain.Ticket;
 import com.wad3s.service_desk.domain.User;
 import com.wad3s.service_desk.dto.ticket.ExecutorUpdateTicketRequest;
-import com.wad3s.service_desk.service.TicketService;
+import com.wad3s.service_desk.service.TicketServiceCustomer;
+import com.wad3s.service_desk.service.TicketServiceExecutor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ExecutorTicketController {
 
-    private final TicketService ticketService;
+    private final TicketServiceExecutor ticketServiceExecutor;
 
     // уже был
     @GetMapping("/my")
@@ -24,7 +25,7 @@ public class ExecutorTicketController {
     public Page<Ticket> getMyTickets(Pageable pageable, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
         Long executorId = currentUser.getId();
-        return ticketService.getTicketsForAssignee(executorId, pageable);
+        return ticketServiceExecutor.getTicketsForAssignee(executorId, pageable);
     }
 
     // НОВОЕ: получить один тикет
@@ -33,7 +34,7 @@ public class ExecutorTicketController {
     public Ticket getTicket(@PathVariable Long id, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
         Long executorId = currentUser.getId();
-        return ticketService.getTicketForExecutor(id, executorId);
+        return ticketServiceExecutor.getTicketForExecutor(id, executorId);
     }
 
     // НОВОЕ: частичное обновление тикета
@@ -44,6 +45,6 @@ public class ExecutorTicketController {
                                Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
         Long executorId = currentUser.getId();
-        return ticketService.updateTicketForExecutor(id, executorId, request);
+        return ticketServiceExecutor.updateTicketForExecutor(id, executorId, request);
     }
 }

@@ -2,13 +2,12 @@ package com.wad3s.service_desk.service;
 
 import com.wad3s.service_desk.domain.*;
 import com.wad3s.service_desk.dto.ticket.*;
+import com.wad3s.service_desk.repository.LocationRepository;
 import com.wad3s.service_desk.repository.SubcategoryRepository;
 import com.wad3s.service_desk.repository.TicketRepository;
 import com.wad3s.service_desk.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,82 +17,84 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class TicketService {
+public class TicketServiceCustomer {
 
     private final TicketRepository ticketRepository;
     private final SubcategoryRepository subcategoryRepository;
     private final UserRepository userRepository;
     private final CurrentUserService currentUserService;
+    private final LocationRepository locationRepository;
+    private final TeamRoutingService teamRoutingService;
+    private final AssignmentService  assignmentService;
 
-    public Page<Ticket> getTicketsForAssignee(Long assigneeId, Pageable pageable) {
-        return ticketRepository.findByAssigneeId(assigneeId, pageable);
-    }
-
-    @Transactional(readOnly = true)
-    public Ticket getTicketForExecutor(Long ticketId, Long executorId) {
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new EntityNotFoundException("Ticket not found: " + ticketId));
-
-        if (ticket.getAssignee() == null ||
-                !ticket.getAssignee().getId().equals(executorId)) {
-            throw new AccessDeniedException("Ticket is not assigned to current executor");
-        }
-
-        return ticket;
-    }
-
-    @Transactional
-    public Ticket updateTicketForExecutor(Long ticketId,
-                                          Long executorId,
-                                          ExecutorUpdateTicketRequest request) {
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new EntityNotFoundException("Ticket not found: " + ticketId));
-
-        if (ticket.getAssignee() == null ||
-                !ticket.getAssignee().getId().equals(executorId)) {
-            throw new AccessDeniedException("Ticket is not assigned to current executor");
-        }
-
-        // частичное обновление
-        if (request.status() != null) {
-            ticket.setStatus(request.status());
-
-            // тут, при желании, можешь добавить логику установки resolvedAt
-            // если статус перешёл в "RESOLVED"/"CLOSED" и т.п.
-        }
-
-        if (request.priority() != null) {
-            ticket.setPriority(request.priority());
-        }
-
-        if (request.location() != null) {
-            ticket.setLocation(request.location());
-        }
-
-        return ticketRepository.save(ticket);
-    }
 
     @Transactional
     public TicketDto create(TicketCreateDto dto) {
+
+        // 1. Текущий пользователь
         String email = currentUserService.getCurrentUserEmail();
         User requester = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
+                .orElseThrow(() ->
+                        new EntityNotFoundException("User not found: " + email)
+                );
 
+        // 2. Локация
+        Location location = locationRepository.findById(dto.locationId())
+                .orElseThrow(() ->
+                        new EntityNotFoundException(
+                                "Location not found: " + dto.locationId()
+                        )
+                );
+
+        // 3. Подкатегория
         Subcategory subcategory = subcategoryRepository.findById(dto.subcategoryId())
-                .orElseThrow(() -> new EntityNotFoundException("Subcategory not found: " + dto.subcategoryId()));
+                .orElseThrow(() ->
+                        new EntityNotFoundException(
+                                "Subcategory not found: " + dto.subcategoryId()
+                        )
+                );
 
-        Ticket t = new Ticket();
-        t.setRequester(requester);
-        t.setSubcategory(subcategory);
-        t.setTitle(dto.title());
-        t.setLocation(dto.location());
-        t.setPriority(dto.priority() != null ? dto.priority() : TicketPriority.MEDIUM);
-        t.setDescription(dto.description());
-        t.setStatus(TicketStatus.NEW);
+        // 4. Поиск группы по иерархии
+        Team assignedTeam = teamRoutingService
+                .findTeamForLocation(location.getId())
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "No team assigned for location: " + location.getId()
+                        )
+                );
 
-        Ticket saved = ticketRepository.save(t);
+        // 5. Подбор исполнителя по skills (или руководитель)
+        User assignee = assignmentService
+                .findAssignee(assignedTeam, subcategory);
+
+        // 6. Создание тикета
+        Ticket ticket = new Ticket();
+        ticket.setRequester(requester);
+        ticket.setSubcategory(subcategory);
+        ticket.setLocation(location);
+        ticket.setAssignedTeam(assignedTeam);
+        ticket.setAssignee(assignee);
+
+        ticket.setTitle(dto.title());
+        ticket.setDescription(dto.description());
+        ticket.setPriority(
+                dto.priority() != null ? dto.priority() : TicketPriority.MEDIUM
+        );
+
+        // 7. Статус
+        if (assignee != null) {
+            ticket.setStatus(TicketStatus.IN_PROGRESS);
+        } else {
+            ticket.setStatus(TicketStatus.NEW);
+        }
+
+        // 8. Сохранение
+        Ticket saved = ticketRepository.save(ticket);
+
         return TicketMapper.toDto(saved);
     }
+
+
 
     @Transactional
     public TicketDto update(Long id, TicketUpdateDto dto) {

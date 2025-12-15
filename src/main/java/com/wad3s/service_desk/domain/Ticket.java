@@ -20,7 +20,7 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // кто создал тикет
+    // кто создал
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "requester_id",
@@ -29,7 +29,7 @@ public class Ticket {
     )
     private User requester;
 
-    // кому назначен (может быть null)
+    // исполнитель (когда взяли в работу)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "assignee_id",
@@ -37,7 +37,24 @@ public class Ticket {
     )
     private User assignee;
 
-    // только подкатегория, категорию берём через неё
+    // назначенная группа (очередь)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "assigned_team_id",
+            foreignKey = @ForeignKey(name = "fk_ticket_team")
+    )
+    private Team assignedTeam;
+
+    // локация
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "location_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_ticket_location")
+    )
+    private Location location;
+
+    // подкатегория
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "subcategory_id",
@@ -49,10 +66,6 @@ public class Ticket {
     @Size(max = 255)
     @Column(nullable = false, length = 255)
     private String title;
-
-    @Size(max = 255)
-    @Column(length = 255)
-    private String location;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -73,22 +86,20 @@ public class Ticket {
     @Column(nullable = false)
     private Instant updatedAt;
 
-    // когда тикет фактически был решён/закрыт
     private Instant resolvedAt;
 
     @PrePersist
-    public void prePersist() {
+    protected void onCreate() {
         Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;
     }
 
     @PreUpdate
-    public void preUpdate() {
+    protected void onUpdate() {
         updatedAt = Instant.now();
     }
 
-    // удобный геттер, если нужно быстро получить категорию
     @Transient
     public Category getCategory() {
         return subcategory != null ? subcategory.getCategory() : null;
