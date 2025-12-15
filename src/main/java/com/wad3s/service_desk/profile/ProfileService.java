@@ -57,6 +57,31 @@ public class ProfileService {
         throw new IllegalStateException("Роль пользователя не поддерживается");
     }
 
+    @Transactional
+    public ProfileDto updateProfile(UpdateProfileRequest request) {
+
+        String email = currentUserService.getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
+
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+
+        userRepository.save(user);
+
+        return getProfile();
+    }
+
     private boolean hasRole(User user, String role) {
         return user.getRoles().stream()
                 .anyMatch(r -> r.getName().equalsIgnoreCase(role));
