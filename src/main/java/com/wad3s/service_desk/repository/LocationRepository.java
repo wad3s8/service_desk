@@ -1,6 +1,7 @@
 package com.wad3s.service_desk.repository;
 
 import com.wad3s.service_desk.domain.Location;
+import com.wad3s.service_desk.domain.LocationType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface LocationRepository extends JpaRepository<Location, Long> {
+
+    List<Location> findAllByType(LocationType type);
 
     List<Location> findByParentId(Long parentId);
 

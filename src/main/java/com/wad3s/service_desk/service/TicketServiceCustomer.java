@@ -148,7 +148,7 @@ public class TicketServiceCustomer {
             throw new AccessDeniedException("Нет прав на изменение этого тикета");
         }
 
-        /* ========= сохраняем старые значения ========= */
+        /* сохраняем старые значения  */
 
         String oldTitle = t.getTitle();
         String oldDescription = t.getDescription();
