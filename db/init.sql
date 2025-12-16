@@ -476,6 +476,7 @@ COPY public.refresh_tokens (id, expires_at, ip, revoked, rotated_at, token_hash,
 23	2025-12-30 22:22:50.128556+05	0:0:0:0:0:0:0:1	f	\N	k/M1Byo5dKuV1+0gvUCqdSVit00GfYJ9RaTsNWJghLQ=	PostmanRuntime/7.51.0	5
 24	2025-12-30 23:16:51.981006+05	0:0:0:0:0:0:0:1	f	\N	2Zb4HpREAwUUQIJ0p7Q6IkP1cihlZC2EuYUTIHW456A=	PostmanRuntime/7.51.0	5
 25	2025-12-30 23:29:44.509633+05	0:0:0:0:0:0:0:1	f	\N	OYeJZFTsVzMnDruBbXFiWq7uGe34itNqQy4auHhinU8=	PostmanRuntime/7.51.0	5
+26	2025-12-31 01:08:04.175294+05	0:0:0:0:0:0:0:1	f	\N	F2tcajZU0TS4M1VV78cFfov5TMR4mpEKivI5JpLv0e4=	PostmanRuntime/7.51.0	11
 \.
 
 
@@ -572,10 +573,14 @@ COPY public.tickets (id, created_at, description, location, priority, resolved_a
 --
 
 COPY public.user_roles (user_id, role_id) FROM stdin;
-2	1
-3	1
-4	1
 5	1
+2	4
+3	3
+4	2
+8	1
+9	2
+10	3
+11	4
 \.
 
 
@@ -589,6 +594,10 @@ COPY public.users (id, email, enabled, first_name, is_admin, last_name, locked, 
 3	user16@example.com	t	\N	f	\N	f	$2a$10$jqnWmqQH7UDtdcWAiJceC.LaOVN2lTQbkH1aOWnc1dLDc/4PDuavG	\N	\N	\N	\N
 4	user17@example.com	t	╨Ш╨▓╨░╨╜	f	╨Я╨╡╤В╤А╨╛╨▓	f	$2a$10$hQ//HWKbaU3kDv0kXDO5p.QOkBVKqqqg2hq/8onX1TQE7mwWe.hqa	\N	\N	\N	\N
 5	user18@example.com	t	╨Ш╨▓╨░╨╜	f	╨Я╨╡╤В╤А╨╛╨▓	f	$2a$10$ZoKUus8l.oUWIVmKL8FMpe7shHMBjItng...PdLiBUN1fmHEDIqGO	89224785333	\N	\N	2
+8	customer@example.com	t	╨в╨╡╤Б╤В	f	╨в╨╡╤Б╤В	f	$2a$10$2l7jFwvArRiEabTu7zY.S.qDHU6/YeKCYpaRgN9jKCm5BCXVjS6ie	\N	\N	\N	\N
+9	executor@example.com	t	╨в╨╡╤Б╤В	f	╨в╨╡╤Б╤В	f	$2a$10$F.yefda2OY0q87f2i7nHeeY5Od5BdAGlEGfSSk5Rtsjk4tGzPMmTS	\N	\N	\N	\N
+10	aho@example.com	t	╨в╨╡╤Б╤В	f	╨в╨╡╤Б╤В	f	$2a$10$irFU3c1OQ/e4T1K8dmUcoOD2BCAwyBXPYkBGUh/7vLPef8g6aUmT.	\N	\N	\N	\N
+11	supervisor@example.com	t	╨в╨╡╤Б╤В	f	╨в╨╡╤Б╤В	f	$2a$10$oUEK3Q9tG9QPIJX7.mTcLOoELM7PTkDYG1MRc7hE8Td87BN.n/ExK	\N	\N	\N	\N
 \.
 
 
@@ -610,7 +619,7 @@ SELECT pg_catalog.setval('public.locations_id_seq', 1, false);
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: service_desk
 --
 
-SELECT pg_catalog.setval('public.refresh_tokens_id_seq', 25, true);
+SELECT pg_catalog.setval('public.refresh_tokens_id_seq', 26, true);
 
 
 --
@@ -680,7 +689,7 @@ SELECT pg_catalog.setval('public.tickets_id_seq', 7, true);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: service_desk
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 7, true);
+SELECT pg_catalog.setval('public.users_id_seq', 11, true);
 
 
 --
