@@ -27,7 +27,7 @@ public class TicketController {
         return ticketServiceCustomer.create(dto);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @PreAuthorize("hasAnyRole('customer')")
     public TicketDto update(
             @PathVariable Long id,
@@ -41,4 +41,12 @@ public class TicketController {
     public List<TicketDto> getMyTickets(Pageable pageable) {
         return ticketServiceCustomer.getMyTickets();
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyRole('customer')")
+    public void delete(@PathVariable Long id) {
+        ticketServiceCustomer.delete(id);
+    }
+
 }
