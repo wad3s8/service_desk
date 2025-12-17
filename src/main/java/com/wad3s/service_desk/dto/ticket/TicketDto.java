@@ -22,8 +22,15 @@ public record TicketDto(
         TicketStatus status,
         String description,
 
+        Long assigneeId,
+        String assigneeName,
+        String assigneeLastName,
+        String assigneeEmail,
+
+
         Instant createdAt,
         Instant updatedAt,
         Instant resolvedAt
 ) {}
+
 

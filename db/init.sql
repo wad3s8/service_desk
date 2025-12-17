@@ -493,7 +493,10 @@ COPY public.refresh_tokens (id, expires_at, ip, revoked, rotated_at, token_hash,
 35	2025-12-31 21:45:47.09991+05	0:0:0:0:0:0:0:1	t	2025-12-17 21:45:48.629445+05	zjFUmZwTBq9axO9FvyCwk7y6LTI8c4boLE0W7iPZBok=	PostmanRuntime/7.51.0	5
 36	2025-12-31 21:45:48.63416+05	0:0:0:0:0:0:0:1	t	2025-12-17 22:25:05.854384+05	9WCCTDucplCYaKI23nMsWKIFFBDZcBKVxh5VeRkfaA8=	PostmanRuntime/7.51.0	5
 37	2025-12-31 22:25:05.935573+05	0:0:0:0:0:0:0:1	t	2025-12-17 22:48:17.22605+05	0IVfHpeoUFa5P3GQbfBWh10/vw0T6+LG+3YEhk1A/6Q=	PostmanRuntime/7.51.0	5
-38	2025-12-31 22:48:17.300577+05	0:0:0:0:0:0:0:1	f	\N	tt6qoXmb3tQKemAANh/kUjc/DkU8w247bq35DbL7nEs=	PostmanRuntime/7.51.0	5
+38	2025-12-31 22:48:17.300577+05	0:0:0:0:0:0:0:1	t	2025-12-17 23:02:02.673871+05	tt6qoXmb3tQKemAANh/kUjc/DkU8w247bq35DbL7nEs=	PostmanRuntime/7.51.0	5
+39	2025-12-31 23:02:02.738545+05	0:0:0:0:0:0:0:1	f	\N	K0n/exuWS54EWJ3wNmeaZRuS8lCJyetCy6mi6czNIA0=	PostmanRuntime/7.51.0	5
+40	2026-01-01 01:30:23.416086+05	0:0:0:0:0:0:0:1	f	\N	Xddc6EAFLbRjb6hSfTijF+cjE4RCtoqE0zpgUxGLKnI=	PostmanRuntime/7.51.0	5
+41	2026-01-01 01:40:45.342152+05	0:0:0:0:0:0:0:1	f	\N	O9QpzDR4uX+pZPlgKebxJuAT2W7NFR40GpEUr48wf2o=	PostmanRuntime/7.51.0	5
 \.
 
 
@@ -540,7 +543,7 @@ COPY public.team_locations (id, responsibility_type, location_id, team_id) FROM 
 --
 
 COPY public.team_member_skills (id, subcategory_id, team_member_id) FROM stdin;
-0	2	1
+0	1	1
 \.
 
 
@@ -576,6 +579,9 @@ COPY public.ticket_comments (id, created_at, system_comment, text, updated_at, a
 --
 
 COPY public.ticket_history (id, action, comment, created_at, new_value, old_value, performed_by, ticket_id) FROM stdin;
+11	CREATED	Заявка создана пользователем	2025-12-18 01:31:14.500014+05	IN_PROGRESS	\N	5	8
+12	ASSIGNEE_CHANGED	Исполнитель назначен автоматически	2025-12-18 01:31:14.508219+05	user18@example.com	\N	5	8
+13	STATUS_CHANGED	Заявка взята в работу автоматически	2025-12-18 01:31:14.515495+05	IN_PROGRESS	NEW	5	8
 \.
 
 
@@ -584,6 +590,7 @@ COPY public.ticket_history (id, action, comment, created_at, new_value, old_valu
 --
 
 COPY public.tickets (id, created_at, description, location, priority, resolved_at, status, title, updated_at, assignee_id, requester_id, subcategory_id, assigned_team_id, location_id) FROM stdin;
+8	2025-12-18 01:31:14.485367+05	string	\N	LOW	\N	IN_PROGRESS	string	2025-12-18 01:31:14.485367+05	5	5	1	1	2
 \.
 
 
@@ -638,7 +645,7 @@ SELECT pg_catalog.setval('public.locations_id_seq', 1, false);
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: service_desk
 --
 
-SELECT pg_catalog.setval('public.refresh_tokens_id_seq', 38, true);
+SELECT pg_catalog.setval('public.refresh_tokens_id_seq', 41, true);
 
 
 --
@@ -694,14 +701,14 @@ SELECT pg_catalog.setval('public.ticket_comments_id_seq', 1, true);
 -- Name: ticket_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: service_desk
 --
 
-SELECT pg_catalog.setval('public.ticket_history_id_seq', 10, true);
+SELECT pg_catalog.setval('public.ticket_history_id_seq', 13, true);
 
 
 --
 -- Name: tickets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: service_desk
 --
 
-SELECT pg_catalog.setval('public.tickets_id_seq', 7, true);
+SELECT pg_catalog.setval('public.tickets_id_seq', 8, true);
 
 
 --

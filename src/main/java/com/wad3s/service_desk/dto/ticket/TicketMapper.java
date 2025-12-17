@@ -1,9 +1,6 @@
 package com.wad3s.service_desk.dto.ticket;
 
-import com.wad3s.service_desk.domain.Category;
-import com.wad3s.service_desk.domain.Location;
-import com.wad3s.service_desk.domain.Subcategory;
-import com.wad3s.service_desk.domain.Ticket;
+import com.wad3s.service_desk.domain.*;
 
 public final class TicketMapper {
 
@@ -14,6 +11,7 @@ public final class TicketMapper {
         Subcategory sub = t.getSubcategory();
         Category cat = sub != null ? sub.getCategory() : null;
         Location loc = t.getLocation();
+        User assignee = t.getAssignee();
 
         return new TicketDto(
                 t.getId(),
@@ -31,10 +29,15 @@ public final class TicketMapper {
                 t.getPriority(),
                 t.getStatus(),
                 t.getDescription(),
+
+                assignee != null ? assignee.getId() : null,
+                assignee != null ? assignee.getFirstName() : null,
+                assignee != null ? assignee.getLastName() : null,
+                assignee != null ? assignee.getEmail() : null,
+
                 t.getCreatedAt(),
                 t.getUpdatedAt(),
                 t.getResolvedAt()
         );
     }
 }
-
