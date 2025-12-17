@@ -1,8 +1,12 @@
 package com.wad3s.service_desk.service;
 
 import com.wad3s.service_desk.domain.Ticket;
+import com.wad3s.service_desk.domain.User;
 import com.wad3s.service_desk.dto.ticket.ExecutorUpdateTicketRequest;
+import com.wad3s.service_desk.dto.ticket.TicketDto;
+import com.wad3s.service_desk.dto.ticket.TicketMapper;
 import com.wad3s.service_desk.repository.TicketRepository;
+import com.wad3s.service_desk.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,15 +15,23 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TicketServiceExecutor {
 
     private final TicketRepository ticketRepository;
+    private final CurrentUserService currentUserService;
+    private final UserRepository userRepository;
 
-
-    public Page<Ticket> getTicketsForAssignee(Long assigneeId, Pageable pageable) {
-        return ticketRepository.findByAssigneeId(assigneeId, pageable);
+    public List<TicketDto> getTicketsForAssignee() {
+        String email = currentUserService.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
+        return ticketRepository.findAllByAssignee(currentUser).stream()
+                .map(TicketMapper::toDto)
+                .toList();
     }
 
     @Transactional(readOnly = true)

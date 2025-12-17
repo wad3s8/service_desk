@@ -497,6 +497,8 @@ COPY public.refresh_tokens (id, expires_at, ip, revoked, rotated_at, token_hash,
 39	2025-12-31 23:02:02.738545+05	0:0:0:0:0:0:0:1	f	\N	K0n/exuWS54EWJ3wNmeaZRuS8lCJyetCy6mi6czNIA0=	PostmanRuntime/7.51.0	5
 40	2026-01-01 01:30:23.416086+05	0:0:0:0:0:0:0:1	f	\N	Xddc6EAFLbRjb6hSfTijF+cjE4RCtoqE0zpgUxGLKnI=	PostmanRuntime/7.51.0	5
 41	2026-01-01 01:40:45.342152+05	0:0:0:0:0:0:0:1	f	\N	O9QpzDR4uX+pZPlgKebxJuAT2W7NFR40GpEUr48wf2o=	PostmanRuntime/7.51.0	5
+42	2026-01-01 02:43:26.1587+05	0:0:0:0:0:0:0:1	f	\N	gt/UmIOhKQv/OgiPGekvgDCRvnQNuEYI1RhqOtCUVZQ=	PostmanRuntime/7.51.0	5
+43	2026-01-01 03:03:54.895373+05	0:0:0:0:0:0:0:1	f	\N	LfacMzsQy6pjpFCSxvoOBrks0Ydsi/sNSUBumoWoYVc=	PostmanRuntime/7.51.0	5
 \.
 
 
@@ -599,7 +601,6 @@ COPY public.tickets (id, created_at, description, location, priority, resolved_a
 --
 
 COPY public.user_roles (user_id, role_id) FROM stdin;
-5	1
 2	4
 3	3
 4	2
@@ -607,6 +608,7 @@ COPY public.user_roles (user_id, role_id) FROM stdin;
 9	2
 10	3
 11	4
+5	2
 \.
 
 
@@ -645,7 +647,7 @@ SELECT pg_catalog.setval('public.locations_id_seq', 1, false);
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: service_desk
 --
 
-SELECT pg_catalog.setval('public.refresh_tokens_id_seq', 41, true);
+SELECT pg_catalog.setval('public.refresh_tokens_id_seq', 43, true);
 
 
 --
