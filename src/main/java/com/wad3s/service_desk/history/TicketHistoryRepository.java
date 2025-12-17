@@ -8,4 +8,6 @@ public interface TicketHistoryRepository
         extends JpaRepository<TicketHistory, Long> {
 
     List<TicketHistory> findByTicketIdOrderByCreatedAtAsc(Long ticketId);
+
+    List<TicketHistory> findByPerformedByIdOrderByCreatedAtDesc(Long userId);
 }
