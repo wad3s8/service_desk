@@ -38,8 +38,4 @@ public class Subcategory {
             foreignKey = @ForeignKey(name = "fk_subcategory_category")
     )
     private Category category;
-
-    // если потом появится сущность Skill, можно заменить на @ManyToOne
-    @Column(name = "default_skill_id")
-    private Long defaultSkillId;
 }

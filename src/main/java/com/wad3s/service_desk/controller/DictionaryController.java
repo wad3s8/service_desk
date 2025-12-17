@@ -38,20 +38,18 @@ public class DictionaryController {
 
     @GetMapping("/categories")
     public List<CategoryDto> getCategories() {
-        return categoryRepository.findAll()
+        return categoryRepository.findAllWithSubcategories()
                 .stream()
-                .map(c -> new CategoryDto(c.getId(), c.getName()))
-                .toList();
-    }
-
-    @GetMapping("/subcategories")
-    public List<SubcategoryDto> getSubcategories() {
-        return subcategoryRepository.findAll()
-                .stream()
-                .map(sc -> new SubcategoryDto(
-                        sc.getId(),
-                        sc.getName(),
-                        sc.getCategory().getId()
+                .map(category -> new CategoryDto(
+                        category.getId(),
+                        category.getName(),
+                        category.getSubcategories()
+                                .stream()
+                                .map(sc -> new SubcategoryDto(
+                                        sc.getId(),
+                                        sc.getName()
+                                ))
+                                .toList()
                 ))
                 .toList();
     }
