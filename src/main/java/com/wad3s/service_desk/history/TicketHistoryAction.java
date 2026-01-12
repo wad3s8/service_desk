@@ -21,5 +21,11 @@ public enum TicketHistoryAction {
     LOCATION_CHANGED,
 
     // комментарии
-    COMMENT_ADDED
+    COMMENT_ADDED,
+
+    // SLA
+    SLA_BREACHED,
+
+    ATTACHMENT_ADDED
+
 }

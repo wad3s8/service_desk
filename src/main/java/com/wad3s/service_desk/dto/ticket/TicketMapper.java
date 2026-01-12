@@ -1,6 +1,9 @@
 package com.wad3s.service_desk.dto.ticket;
 
+import com.wad3s.service_desk.attachment.TicketAttachmentDto;
 import com.wad3s.service_desk.domain.*;
+
+import java.util.List;
 
 public final class TicketMapper {
 
@@ -38,6 +41,24 @@ public final class TicketMapper {
                 t.getCreatedAt(),
                 t.getUpdatedAt(),
                 t.getResolvedAt()
+        );
+    }
+
+    public static TicketWithFilesDto toWithFilesDto(
+            Ticket t,
+            List<TicketAttachmentDto> attachments
+    ) {
+        return new TicketWithFilesDto(
+                t.getId(),
+                t.getTitle(),
+                t.getDescription(),
+                t.getPriority(),
+                t.getStatus(),
+                t.getCreatedAt(),
+                t.getUpdatedAt(),
+                t.getResolveDueAt(),
+                t.getResolveBreachedAt(),
+                attachments
         );
     }
 }

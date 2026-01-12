@@ -1,5 +1,8 @@
 package com.wad3s.service_desk.service;
 
+import com.wad3s.service_desk.attachment.FileStorageService;
+import com.wad3s.service_desk.attachment.TicketAttachment;
+import com.wad3s.service_desk.attachment.TicketAttachmentRepository;
 import com.wad3s.service_desk.domain.*;
 import com.wad3s.service_desk.dto.ticket.*;
 import com.wad3s.service_desk.history.TicketHistoryAction;
@@ -8,11 +11,13 @@ import com.wad3s.service_desk.repository.LocationRepository;
 import com.wad3s.service_desk.repository.SubcategoryRepository;
 import com.wad3s.service_desk.repository.TicketRepository;
 import com.wad3s.service_desk.repository.UserRepository;
+import com.wad3s.service_desk.sla.TicketSlaService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.util.List;
@@ -29,11 +34,13 @@ public class TicketServiceCustomer {
     private final TeamRoutingService teamRoutingService;
     private final AssignmentService  assignmentService;
     private final TicketHistoryService historyService;
-
+    private final TicketSlaService ticketSlaService;
+    private final FileStorageService fileStorageService;
+    private final TicketAttachmentRepository attachmentRepository;
 
 
     @Transactional
-    public TicketDto create(TicketCreateDto dto) {
+    public TicketDto create(TicketCreateDto dto, List<MultipartFile> files) {
 
         // 1. Текущий пользователь
         String email = currentUserService.getCurrentUserEmail();
@@ -92,8 +99,35 @@ public class TicketServiceCustomer {
             ticket.setStatus(TicketStatus.NEW);
         }
 
+        Instant now = Instant.now();
+        ticket.setResolveDueAt(ticketSlaService.calcResolveDueAt(subcategory, now));
+
         // 8. Сохранение
         Ticket saved = ticketRepository.save(ticket);
+
+        // 8.1 Вложения
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile f : files) {
+                if (f.isEmpty()) continue;
+
+                String storageKey = fileStorageService.save(f, saved.getId());
+
+                TicketAttachment att = new TicketAttachment();
+                att.setTicket(saved);
+                att.setFilename(
+                        f.getOriginalFilename() != null ? f.getOriginalFilename() : "file"
+                );
+                att.setContentType(
+                        f.getContentType() != null ? f.getContentType() : "application/octet-stream"
+                );
+                att.setSize(f.getSize());
+                att.setStorageKey(storageKey);
+                att.setUploadedBy(requester);
+
+                attachmentRepository.save(att);
+            }
+        }
+
 
         // 9. История
         historyService.record(
@@ -130,7 +164,6 @@ public class TicketServiceCustomer {
     }
 
 
-
     @Transactional
     public TicketDto update(Long id, TicketUpdateDto dto) {
 
@@ -148,15 +181,12 @@ public class TicketServiceCustomer {
             throw new AccessDeniedException("Нет прав на изменение этого тикета");
         }
 
-        /* сохраняем старые значения  */
 
         String oldTitle = t.getTitle();
         String oldDescription = t.getDescription();
         Subcategory oldSubcategory = t.getSubcategory();
-        Long oldLocationId = t.getLocation().getId();
         TicketPriority oldPriority = t.getPriority();
 
-        /* ========= title ========= */
 
         if (dto.title() != null && !dto.title().equals(oldTitle)) {
             t.setTitle(dto.title());
@@ -171,7 +201,6 @@ public class TicketServiceCustomer {
             );
         }
 
-        /* ========= location ========= */
 
         if (dto.locationId() != null) {
 
@@ -200,7 +229,6 @@ public class TicketServiceCustomer {
             }
         }
 
-        /* ========= subcategory ========= */
 
         if (dto.subcategoryId() != null) {
             Subcategory newSubcategory = subcategoryRepository.findById(dto.subcategoryId())
@@ -224,7 +252,6 @@ public class TicketServiceCustomer {
             }
         }
 
-        /* ========= priority ========= */
 
         if (dto.priority() != null && dto.priority() != oldPriority) {
             t.setPriority(dto.priority());
@@ -239,7 +266,6 @@ public class TicketServiceCustomer {
             );
         }
 
-        /* ========= description ========= */
 
         if (dto.description() != null && !dto.description().equals(oldDescription)) {
             t.setDescription(dto.description());
@@ -258,6 +284,44 @@ public class TicketServiceCustomer {
         Ticket saved = ticketRepository.save(t);
         return TicketMapper.toDto(saved);
     }
+
+    @Transactional
+    public TicketDto update(Long id, TicketUpdateDto dto, List<MultipartFile> files) {
+        TicketDto updated = update(id, dto);
+        if (files == null || files.isEmpty()) return updated;
+        Ticket t = ticketRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found: " + id));
+        String email = currentUserService.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
+
+        for (MultipartFile f : files) {
+            if (f.isEmpty()) continue;
+
+            String storageKey = fileStorageService.save(f, t.getId());
+
+            TicketAttachment att = new TicketAttachment();
+            att.setTicket(t);
+            att.setFilename(f.getOriginalFilename() != null ? f.getOriginalFilename() : "file");
+            att.setContentType(f.getContentType() != null ? f.getContentType() : "application/octet-stream");
+            att.setSize(f.getSize());
+            att.setStorageKey(storageKey);
+            att.setUploadedBy(currentUser);
+
+            attachmentRepository.save(att);
+
+            historyService.record(
+                    t,
+                    TicketHistoryAction.ATTACHMENT_ADDED,
+                    null,
+                    att.getFilename(),
+                    "Добавлено вложение",
+                    currentUser
+            );
+        }
+        return TicketMapper.toDto(t);
+    }
+
 
 
     @Transactional
@@ -292,17 +356,4 @@ public class TicketServiceCustomer {
                 currentUser
         );
     }
-
-
-    @Transactional(readOnly = true)
-    public List<TicketDto> getMyTickets() {
-        String email = currentUserService.getCurrentUserEmail();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
-
-        return ticketRepository.findAllByRequester(currentUser).stream()
-                .map(TicketMapper::toDto)
-                .toList();
-    }
-
 }

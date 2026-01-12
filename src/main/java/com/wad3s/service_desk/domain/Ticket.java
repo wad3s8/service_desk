@@ -62,6 +62,11 @@ public class Ticket {
     )
     private Subcategory subcategory;
 
+    @Column(nullable = false)
+    private Instant resolveDueAt;
+
+    private Instant resolveBreachedAt;
+
     @NotBlank
     @Size(max = 255)
     @Column(nullable = false, length = 255)

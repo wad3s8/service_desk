@@ -1,11 +1,15 @@
 package com.wad3s.service_desk.controller;
 
+import com.wad3s.service_desk.attachment.TicketQueryService;
 import com.wad3s.service_desk.domain.Ticket;
 import com.wad3s.service_desk.domain.User;
 import com.wad3s.service_desk.dto.ticket.ExecutorUpdateTicketRequest;
 import com.wad3s.service_desk.dto.ticket.TicketDto;
+import com.wad3s.service_desk.dto.ticket.TicketExecutorUpdateDto;
+import com.wad3s.service_desk.dto.ticket.TicketWithFilesDto;
 import com.wad3s.service_desk.service.TicketServiceCustomer;
 import com.wad3s.service_desk.service.TicketServiceExecutor;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,15 +25,15 @@ import java.util.List;
 public class ExecutorTicketController {
 
     private final TicketServiceExecutor ticketServiceExecutor;
+    private final TicketQueryService ticketQueryService;
 
-    // уже был
+
     @GetMapping("/my")
     @PreAuthorize("hasRole('executor')")
-    public List<TicketDto> getMyTickets() {
-        return ticketServiceExecutor.getTicketsForAssignee();
+    public List<TicketWithFilesDto> getMyTicketsWithFiles() {
+        return ticketQueryService.getAssignedTickets();
     }
 
-    // НОВОЕ: получить один тикет
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('executor')")
     public Ticket getTicket(@PathVariable Long id, Authentication authentication) {
@@ -38,14 +42,12 @@ public class ExecutorTicketController {
         return ticketServiceExecutor.getTicketForExecutor(id, executorId);
     }
 
-    // НОВОЕ: частичное обновление тикета
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('executor')")
-    public Ticket updateTicket(@PathVariable Long id,
-                               @RequestBody ExecutorUpdateTicketRequest request,
-                               Authentication authentication) {
-        User currentUser = (User) authentication.getPrincipal();
-        Long executorId = currentUser.getId();
-        return ticketServiceExecutor.updateTicketForExecutor(id, executorId, request);
+    public TicketDto updateAsExecutor(
+            @PathVariable Long id,
+            @Valid @RequestBody TicketExecutorUpdateDto dto
+    ) {
+        return ticketServiceExecutor.updateAsExecutor(id, dto);
     }
 }
