@@ -3,16 +3,13 @@ package com.wad3s.service_desk.controller;
 import com.wad3s.service_desk.attachment.TicketQueryService;
 import com.wad3s.service_desk.domain.Ticket;
 import com.wad3s.service_desk.domain.User;
-import com.wad3s.service_desk.dto.ticket.ExecutorUpdateTicketRequest;
 import com.wad3s.service_desk.dto.ticket.TicketDto;
 import com.wad3s.service_desk.dto.ticket.TicketExecutorUpdateDto;
 import com.wad3s.service_desk.dto.ticket.TicketWithFilesDto;
-import com.wad3s.service_desk.service.TicketServiceCustomer;
 import com.wad3s.service_desk.service.TicketServiceExecutor;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -49,5 +46,12 @@ public class ExecutorTicketController {
             @Valid @RequestBody TicketExecutorUpdateDto dto
     ) {
         return ticketServiceExecutor.updateAsExecutor(id, dto);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyRole('customer')")
+    public void delete(@PathVariable Long id) {
+        ticketServiceExecutor.delete(id);
     }
 }

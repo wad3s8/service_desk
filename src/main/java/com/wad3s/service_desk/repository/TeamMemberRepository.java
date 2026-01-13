@@ -42,4 +42,8 @@ public interface TeamMemberRepository
 
     @EntityGraph(attributePaths = "team")
     Optional<TeamMember> findByUserIdAndActiveTrue(Long userId);
+
+    List<TeamMember> findAllByUserIdAndActiveTrue(Long userId);
+
+    List<TeamMember> findAllByTeamIdAndActiveTrue(Long teamId);
 }

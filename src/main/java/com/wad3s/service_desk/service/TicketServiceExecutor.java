@@ -142,4 +142,38 @@ public class TicketServiceExecutor {
         return TicketMapper.toDto(saved);
     }
 
+
+    @Transactional
+    public void delete(Long id) {
+
+        // текущий пользователь
+        String email = currentUserService.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
+
+        // тикет
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found: " + id));
+
+        // только автор может отменить
+        if (!ticket.getAssignee().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("Нет прав на отмену этого тикета");
+        }
+
+        TicketStatus oldStatus = ticket.getStatus();
+
+        // soft delete
+        ticket.setStatus(TicketStatus.CANCELED);
+
+        // история
+        historyService.record(
+                ticket,
+                TicketHistoryAction.STATUS_CHANGED,
+                oldStatus.name(),
+                TicketStatus.CANCELED.name(),
+                "Заявка отменена пользователем",
+                currentUser
+        );
+    }
+
 }
