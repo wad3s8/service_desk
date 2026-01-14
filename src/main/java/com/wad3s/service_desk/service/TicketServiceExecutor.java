@@ -56,7 +56,23 @@ public class TicketServiceExecutor {
         return TicketMapper.toWithFilesDto(t, files);
     }
 
+    @Transactional(readOnly = true)
+    public TicketWithFilesDto getTicketById(Long ticketId) {
+        Ticket t = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found: " + ticketId));
 
+        List<TicketAttachmentDto> files =
+                attachmentRepository.findAllByTicketId(t.getId()).stream()
+                        .map(a -> new TicketAttachmentDto(
+                                a.getId(),
+                                a.getFilename(),
+                                a.getContentType(),
+                                a.getSize()
+                        ))
+                        .toList();
+
+        return TicketMapper.toWithFilesDto(t, files);
+    }
 
     @Transactional
     public TicketDto updateAsExecutor(Long id, TicketExecutorUpdateDto dto) {

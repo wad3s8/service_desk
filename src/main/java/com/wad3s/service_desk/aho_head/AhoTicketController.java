@@ -55,7 +55,7 @@ public class AhoTicketController {
         public TicketWithFilesDto getTicket(@PathVariable Long id, Authentication authentication) {
             User currentUser = (User) authentication.getPrincipal();
             Long executorId = currentUser.getId();
-            return ticketServiceExecutor.getTicketForExecutor(id, executorId);
+            return ticketServiceExecutor.getTicketById(id);
         }
 
         @PatchMapping("/tickets/{id}")
