@@ -46,4 +46,6 @@ public interface TeamMemberRepository
     List<TeamMember> findAllByUserIdAndActiveTrue(Long userId);
 
     List<TeamMember> findAllByTeamIdAndActiveTrue(Long teamId);
+
+    boolean existsByTeamIdAndUserIdAndActiveTrue(Long teamId, Long userId);
 }

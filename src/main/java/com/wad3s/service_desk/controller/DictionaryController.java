@@ -5,9 +5,11 @@ import com.wad3s.service_desk.domain.LocationType;
 import com.wad3s.service_desk.dto.CategoryDto;
 import com.wad3s.service_desk.dto.LocationDto;
 import com.wad3s.service_desk.dto.SubcategoryDto;
+import com.wad3s.service_desk.dto.TeamListItemDto;
 import com.wad3s.service_desk.repository.CategoryRepository;
 import com.wad3s.service_desk.repository.LocationRepository;
 import com.wad3s.service_desk.repository.SubcategoryRepository;
+import com.wad3s.service_desk.repository.TeamRepository;
 import com.wad3s.service_desk.sla.SubcategorySlaListItemDto;
 import com.wad3s.service_desk.sla.SubcategorySlaListService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,15 @@ public class DictionaryController {
     private final SubcategoryRepository subcategoryRepository;
     private final LocationRepository locationRepository;
     private final SubcategorySlaListService subcategorySlaListService;
+    private final TeamRepository teamRepository;
+
+    @GetMapping("/teams")
+    public List<TeamListItemDto> getTeams() {
+        return teamRepository.findAllByActiveTrueOrderByNameAsc()
+                .stream()
+                .map(t -> new TeamListItemDto(t.getId(), t.getName(), t.getCode()))
+                .toList();
+    }
 
     @GetMapping("/subcategories")
     public List<SubcategorySlaListItemDto> listSubcategoriesSla() {

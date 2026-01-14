@@ -1,28 +1,36 @@
 package com.wad3s.service_desk.calendar;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 
 @RestController
-@RequestMapping("/api/tickets/calendar")
+@RequestMapping("/calendar")
 @RequiredArgsConstructor
 public class TicketCalendarController {
 
     private final TicketCalendarService ticketCalendarService;
 
-    @GetMapping
-    public TicketCalendarResponseDto getCalendar(
+    // 1) календарь по teamId (фронт передаёт)
+    @GetMapping("/teams/{teamId}/tickets")
+    public TicketCalendarResponseDto getCalendarByTeam(
+            @PathVariable Long teamId,
             @RequestParam LocalDate from,
             @RequestParam LocalDate to,
             @RequestParam(required = false, defaultValue = "UTC") String timezone
     ) {
-        ZoneId zoneId = ZoneId.of(timezone);
-        return ticketCalendarService.getCalendar(from, to, zoneId);
+        return ticketCalendarService.getCalendarByTeam(teamId, from, to, ZoneId.of(timezone));
+    }
+
+    // 2) календарь по команде текущего пользователя
+    @GetMapping("/tickets/my-team")
+    public TicketCalendarResponseDto getCalendarForMyTeam(
+            @RequestParam LocalDate from,
+            @RequestParam LocalDate to,
+            @RequestParam(required = false, defaultValue = "UTC") String timezone
+    ) {
+        return ticketCalendarService.getCalendarForMyTeam(from, to, ZoneId.of(timezone));
     }
 }

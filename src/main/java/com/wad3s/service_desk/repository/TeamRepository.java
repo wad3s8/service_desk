@@ -23,4 +23,6 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
           and t.active = true
     """)
     List<Team> findActiveTeamsByUser(@Param("userId") Long userId);
+
+    List<Team> findAllByActiveTrueOrderByNameAsc();
 }

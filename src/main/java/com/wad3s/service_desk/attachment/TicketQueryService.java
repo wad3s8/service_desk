@@ -76,6 +76,71 @@ public class TicketQueryService {
     }
 
     @Transactional(readOnly = true)
+    public List<TicketWithFilesDto> getMyFinishedTickets() {
+
+        String email = currentUserService.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
+
+        List<TicketStatus> finishedStatuses = List.of(
+                TicketStatus.RESOLVED,
+                TicketStatus.CLOSED,
+                TicketStatus.CANCELED
+        );
+
+        return ticketRepository
+                .findAllByAssigneeAndStatusIn(currentUser, finishedStatuses)
+                .stream()
+                .map(t -> {
+                    List<TicketAttachmentDto> files =
+                            attachmentRepository.findAllByTicketId(t.getId()).stream()
+                                    .map(a -> new TicketAttachmentDto(
+                                            a.getId(),
+                                            a.getFilename(),
+                                            a.getContentType(),
+                                            a.getSize()
+                                    ))
+                                    .toList();
+
+                    return TicketMapper.toWithFilesDto(t, files);
+                })
+                .toList();
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<TicketWithFilesDto> getMyActiveTickets() {
+
+        String email = currentUserService.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
+
+        List<TicketStatus> activeStatuses = List.of(
+                TicketStatus.NEW,
+                TicketStatus.IN_PROGRESS
+        );
+
+        return ticketRepository
+                .findAllByAssigneeAndStatusIn(currentUser, activeStatuses)
+                .stream()
+                .map(t -> {
+                    List<TicketAttachmentDto> files =
+                            attachmentRepository.findAllByTicketId(t.getId()).stream()
+                                    .map(a -> new TicketAttachmentDto(
+                                            a.getId(),
+                                            a.getFilename(),
+                                            a.getContentType(),
+                                            a.getSize()
+                                    ))
+                                    .toList();
+
+                    return TicketMapper.toWithFilesDto(t, files);
+                })
+                .toList();
+    }
+
+
+    @Transactional(readOnly = true)
     public List<TicketWithFilesDto> getMyTeamTicketsExceptMe() {
 
         String email = currentUserService.getCurrentUserEmail();

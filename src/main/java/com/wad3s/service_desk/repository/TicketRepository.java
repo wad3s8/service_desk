@@ -1,6 +1,7 @@
 package com.wad3s.service_desk.repository;
 
 import com.wad3s.service_desk.domain.Ticket;
+import com.wad3s.service_desk.domain.TicketStatus;
 import com.wad3s.service_desk.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,6 +63,7 @@ where t.resolvedAt is not null
 """)
     List<Ticket> findClosedForAvgTime(Instant from, Instant to);
 
+    List<Ticket> findAllByAssigneeAndStatusIn(User assignee, Collection<TicketStatus> statuses);
 
     List<Ticket> findAllByAssigneeInAndAssigneeNot(Collection<User> assignees, User excluded);
 
@@ -72,4 +74,10 @@ where t.resolvedAt is not null
           and t.resolveDueAt < :now
     """)
     List<Ticket> findNewlyBreached(@Param("now") Instant now);
+
+    List<Ticket> findAllByResolveDueAtBetweenAndAssigneeIn(
+            Instant from,
+            Instant to,
+            Collection<User> assignees
+    );
 }

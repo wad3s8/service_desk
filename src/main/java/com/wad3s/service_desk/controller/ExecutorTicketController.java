@@ -25,10 +25,16 @@ public class ExecutorTicketController {
     private final TicketQueryService ticketQueryService;
 
 
-    @GetMapping("/my")
+    @GetMapping("/my/active")
     @PreAuthorize("hasRole('executor')")
     public List<TicketWithFilesDto> getMyTicketsWithFiles() {
-        return ticketQueryService.getAssignedTickets();
+        return ticketQueryService.getMyActiveTickets();
+    }
+
+    @GetMapping("/my/finished")
+    @PreAuthorize("hasRole('executor')")
+    public List<TicketWithFilesDto> getMyFinishedTickets() {
+        return ticketQueryService.getMyFinishedTickets();
     }
 
     @GetMapping("/{id}")
@@ -50,7 +56,7 @@ public class ExecutorTicketController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAnyRole('customer')")
+    @PreAuthorize("hasAnyRole('executor')")
     public void delete(@PathVariable Long id) {
         ticketServiceExecutor.delete(id);
     }
