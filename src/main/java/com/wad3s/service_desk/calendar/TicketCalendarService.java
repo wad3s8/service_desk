@@ -35,12 +35,6 @@ public class TicketCalendarService {
             LocalDate to,
             ZoneId zoneId
     ) {
-        // (по желанию) проверка что текущий пользователь состоит в команде
-        User currentUser = getCurrentUser();
-        if (!teamMemberRepository.existsByTeamIdAndUserIdAndActiveTrue(teamId, currentUser.getId())) {
-            // можно AccessDeniedException (403), или пустой ответ
-            throw new org.springframework.security.access.AccessDeniedException("Not a member of this team");
-        }
 
         List<User> teamUsers = teamMemberRepository.findAllByTeamIdAndActiveTrue(teamId).stream()
                 .map(TeamMember::getUser)
