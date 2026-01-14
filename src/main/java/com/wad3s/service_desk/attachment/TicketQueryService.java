@@ -27,6 +27,12 @@ public class TicketQueryService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
 
+    private static final List<TicketStatus> FINISHED_STATUSES = List.of(
+            TicketStatus.RESOLVED,
+            TicketStatus.CLOSED,
+            TicketStatus.CANCELED
+    );
+
     @Transactional(readOnly = true)
     public List<TicketWithFilesDto> getMyTickets() {
 
@@ -107,6 +113,33 @@ public class TicketQueryService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<TicketWithFilesDto> getMyArchivedTickets() {
+
+        String email = currentUserService.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
+
+        return ticketRepository
+                .findAllByAssigneeAndStatusIn(currentUser, FINISHED_STATUSES)
+                .stream()
+                .map(t -> {
+                    List<TicketAttachmentDto> files =
+                            attachmentRepository.findAllByTicketId(t.getId()).stream()
+                                    .map(a -> new TicketAttachmentDto(
+                                            a.getId(),
+                                            a.getFilename(),
+                                            a.getContentType(),
+                                            a.getSize()
+                                    ))
+                                    .toList();
+
+                    return TicketMapper.toWithFilesDto(t, files);
+                })
+                .toList();
+    }
+
+
 
     @Transactional(readOnly = true)
     public List<TicketWithFilesDto> getMyActiveTickets() {
@@ -141,29 +174,29 @@ public class TicketQueryService {
 
 
     @Transactional(readOnly = true)
-    public List<TicketWithFilesDto> getMyTeamTicketsExceptMe() {
+    public List<TicketWithFilesDto> getMyTeamTicketsExceptMeActive() {
 
         String email = currentUserService.getCurrentUserEmail();
         User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
 
-        // 1) находим команды пользователя
+        List<TicketStatus> activeStatuses = List.of(
+                TicketStatus.NEW,
+                TicketStatus.IN_PROGRESS
+        );
+
         List<TeamMember> myMemberships = teamMemberRepository.findAllByUserIdAndActiveTrue(currentUser.getId());
         if (myMemberships.isEmpty()) {
             throw new EntityNotFoundException("Current user is not in any active team");
         }
 
-        // 2) выбираем команду (если пользователь в нескольких)
-        // Правило: сначала TEAM_LEAD/HEAD (если есть), иначе первая
         TeamMember chosen = myMemberships.stream()
                 .filter(m -> m.getRole() == TeamRole.MANAGER)
                 .findFirst()
                 .orElse(myMemberships.get(0));
 
-        Team team = chosen.getTeam();
-        Long teamId = team.getId();
+        Long teamId = chosen.getTeam().getId();
 
-        // 3) все активные участники этой команды, кроме меня
         List<User> teamUsersExceptMe = teamMemberRepository.findAllByTeamIdAndActiveTrue(teamId).stream()
                 .map(TeamMember::getUser)
                 .filter(u -> u != null && !u.getId().equals(currentUser.getId()))
@@ -171,10 +204,9 @@ public class TicketQueryService {
 
         if (teamUsersExceptMe.isEmpty()) return List.of();
 
-        // 4) тикеты команды, кроме моих
-        List<Ticket> tickets = ticketRepository.findAllByAssigneeInAndAssigneeNot(teamUsersExceptMe, currentUser);
+        List<Ticket> tickets = ticketRepository
+                .findAllByAssigneeInAndAssigneeNotAndStatusIn(teamUsersExceptMe, currentUser, activeStatuses);
 
-        // 5) маппинг + файлы (как у тебя)
         return tickets.stream()
                 .map(t -> {
                     List<TicketAttachmentDto> files =
@@ -191,6 +223,7 @@ public class TicketQueryService {
                 })
                 .toList();
     }
+
 
 
 }

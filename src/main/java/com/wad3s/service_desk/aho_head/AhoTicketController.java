@@ -1,7 +1,6 @@
 package com.wad3s.service_desk.aho_head;
 
 import com.wad3s.service_desk.attachment.TicketQueryService;
-import com.wad3s.service_desk.domain.Ticket;
 import com.wad3s.service_desk.domain.User;
 import com.wad3s.service_desk.dto.TeamDto;
 import com.wad3s.service_desk.dto.ticket.TicketDto;
@@ -32,10 +31,16 @@ public class AhoTicketController {
             return ticketQueryService.getAssignedTickets();
         }
 
-    @GetMapping("/tickets/my/tickets-team")
+    @GetMapping("/tickets/my/tickets-team/active")
+    @PreAuthorize("hasRole('aho_head')")
+    public List<TicketWithFilesDto> getMyTeamTicketsExceptMeActive() {
+        return ticketQueryService.getMyTeamTicketsExceptMeActive();
+    }
+
+    @GetMapping("/tickets/my/tickets-team/finished")
     @PreAuthorize("hasRole('aho_head')")
     public List<TicketWithFilesDto> getMyTeamTicketsExceptMe() {
-        return ticketQueryService.getMyTeamTicketsExceptMe();
+        return ticketQueryService.getMyArchivedTickets();
     }
 
     @GetMapping("/member-teams")
@@ -47,7 +52,7 @@ public class AhoTicketController {
 
     @GetMapping("/tickets/{id}")
         @PreAuthorize("hasRole('aho_head')")
-        public Ticket getTicket(@PathVariable Long id, Authentication authentication) {
+        public TicketWithFilesDto getTicket(@PathVariable Long id, Authentication authentication) {
             User currentUser = (User) authentication.getPrincipal();
             Long executorId = currentUser.getId();
             return ticketServiceExecutor.getTicketForExecutor(id, executorId);

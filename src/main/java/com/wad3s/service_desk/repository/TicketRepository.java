@@ -80,4 +80,11 @@ where t.resolvedAt is not null
             Instant to,
             Collection<User> assignees
     );
+
+    List<Ticket> findAllByAssigneeInAndAssigneeNotAndStatusIn(
+            List<User> assignees,
+            User excludedAssignee,
+            List<TicketStatus> statuses
+    );
+
 }

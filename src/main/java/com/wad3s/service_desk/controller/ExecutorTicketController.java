@@ -39,7 +39,7 @@ public class ExecutorTicketController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('executor')")
-    public Ticket getTicket(@PathVariable Long id, Authentication authentication) {
+    public TicketWithFilesDto getTicket(@PathVariable Long id, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
         Long executorId = currentUser.getId();
         return ticketServiceExecutor.getTicketForExecutor(id, executorId);

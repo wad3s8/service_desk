@@ -1,5 +1,7 @@
 package com.wad3s.service_desk.service;
 
+import com.wad3s.service_desk.attachment.TicketAttachmentDto;
+import com.wad3s.service_desk.attachment.TicketAttachmentRepository;
 import com.wad3s.service_desk.domain.*;
 import com.wad3s.service_desk.dto.ticket.*;
 import com.wad3s.service_desk.history.TicketHistoryAction;
@@ -29,20 +31,32 @@ public class TicketServiceExecutor {
     private final SubcategoryRepository subcategoryRepository;
     private final TicketHistoryService historyService;
     private final TicketSlaService ticketSlaService;
+    private final TicketAttachmentRepository attachmentRepository;
 
 
     @Transactional(readOnly = true)
-    public Ticket getTicketForExecutor(Long ticketId, Long executorId) {
-        Ticket ticket = ticketRepository.findById(ticketId)
+    public TicketWithFilesDto getTicketForExecutor(Long ticketId, Long executorId) {
+        Ticket t = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket not found: " + ticketId));
 
-        if (ticket.getAssignee() == null ||
-                !ticket.getAssignee().getId().equals(executorId)) {
+        if (t.getAssignee() == null || !t.getAssignee().getId().equals(executorId)) {
             throw new AccessDeniedException("Ticket is not assigned to current executor");
         }
 
-        return ticket;
+        List<TicketAttachmentDto> files =
+                attachmentRepository.findAllByTicketId(t.getId()).stream()
+                        .map(a -> new TicketAttachmentDto(
+                                a.getId(),
+                                a.getFilename(),
+                                a.getContentType(),
+                                a.getSize()
+                        ))
+                        .toList();
+
+        return TicketMapper.toWithFilesDto(t, files);
     }
+
+
 
     @Transactional
     public TicketDto updateAsExecutor(Long id, TicketExecutorUpdateDto dto) {

@@ -2,6 +2,7 @@ package com.wad3s.service_desk.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wad3s.service_desk.attachment.TicketQueryService;
+import com.wad3s.service_desk.domain.User;
 import com.wad3s.service_desk.dto.ticket.TicketCreateDto;
 import com.wad3s.service_desk.dto.ticket.TicketDto;
 import com.wad3s.service_desk.dto.ticket.TicketUpdateDto;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,6 +47,14 @@ public class TicketController {
             @Valid @RequestBody TicketUpdateDto dto
     ) {
         return ticketServiceCustomer.update(id, dto);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('customer')")
+    public TicketWithFilesDto getTicket(@PathVariable Long id, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        Long executorId = currentUser.getId();
+        return ticketServiceCustomer.getTicketForCustomer(id, executorId);
     }
 
     @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

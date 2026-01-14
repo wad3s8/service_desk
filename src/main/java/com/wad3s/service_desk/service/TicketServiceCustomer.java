@@ -2,6 +2,7 @@ package com.wad3s.service_desk.service;
 
 import com.wad3s.service_desk.attachment.FileStorageService;
 import com.wad3s.service_desk.attachment.TicketAttachment;
+import com.wad3s.service_desk.attachment.TicketAttachmentDto;
 import com.wad3s.service_desk.attachment.TicketAttachmentRepository;
 import com.wad3s.service_desk.domain.*;
 import com.wad3s.service_desk.dto.ticket.*;
@@ -161,6 +162,29 @@ public class TicketServiceCustomer {
 
         return TicketMapper.toDto(saved);
 
+    }
+
+
+    @Transactional(readOnly = true)
+    public TicketWithFilesDto getTicketForCustomer(Long ticketId, Long customerId) {
+        Ticket t = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new EntityNotFoundException("Ticket not found: " + ticketId));
+
+        if (t.getRequester() == null || !t.getRequester().getId().equals(customerId)) {
+            throw new AccessDeniedException("Ticket does not belong to current customer");
+        }
+
+        List<TicketAttachmentDto> files =
+                attachmentRepository.findAllByTicketId(t.getId()).stream()
+                        .map(a -> new TicketAttachmentDto(
+                                a.getId(),
+                                a.getFilename(),
+                                a.getContentType(),
+                                a.getSize()
+                        ))
+                        .toList();
+
+        return TicketMapper.toWithFilesDto(t, files);
     }
 
 
