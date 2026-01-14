@@ -521,6 +521,13 @@ COPY public.refresh_tokens (id, expires_at, ip, revoked, rotated_at, token_hash,
 3	2026-01-27 15:48:56.896722+05	0:0:0:0:0:0:0:1	f	\N	ZDWMiExJhQ4M4g9ckGbR6BkQrcUB75qINkkUd3M7JDA=	PostmanRuntime/7.51.0	5
 4	2026-01-27 16:08:02.792937+05	0:0:0:0:0:0:0:1	f	\N	JOme16s1CEFYDvEtYnWbaVgq+G+2mM7MqsOZ8cCzyO4=	PostmanRuntime/7.51.0	2
 5	2026-01-27 16:27:11.848938+05	0:0:0:0:0:0:0:1	f	\N	ZnhOtr8sHOwq9GhFwqO7IeqvGaBMBO1R2AuBWxkPWJM=	PostmanRuntime/7.51.0	5
+6	2026-01-28 22:33:48.920594+05	0:0:0:0:0:0:0:1	f	\N	ceLBWg50VbFvjpEJq6OLLBrT2kUwxjl5PIImhGlqu/I=	PostmanRuntime/7.51.0	2
+7	2026-01-28 22:35:42.907415+05	0:0:0:0:0:0:0:1	f	\N	J2sTq3mau16gplwRPlVcvuBG5SvHDiw3cd9oC381bIs=	PostmanRuntime/7.51.0	2
+8	2026-01-28 22:51:12.992441+05	0:0:0:0:0:0:0:1	f	\N	vUIhF7zByTwnsrWgYcTnzToGY6j7d3bVGddNsH5ZI1g=	PostmanRuntime/7.51.0	2
+9	2026-01-28 22:55:10.263973+05	0:0:0:0:0:0:0:1	f	\N	nhFOf1vqf6egsMMOsJxexnLgEyu6wbp6dU9mhxmXbzw=	PostmanRuntime/7.51.0	1
+10	2026-01-28 23:14:14.311492+05	0:0:0:0:0:0:0:1	f	\N	GQRPbHDCGTxQlKxsz6t2hyOazjVewepvXZm31Dogt7Q=	PostmanRuntime/7.51.0	5
+11	2026-01-29 00:07:16.528294+05	0:0:0:0:0:0:0:1	f	\N	u2Ak+1wETnKcjOADK7km/ipYkiwBQQw1eCEAwmC/JT0=	PostmanRuntime/7.51.0	1
+12	2026-01-29 01:05:21.283199+05	0:0:0:0:0:0:0:1	f	\N	zmI+bgQxr6dnibvOdP/ezcix0L776NGiAV1xzrQXhYg=	PostmanRuntime/7.51.0	1
 \.
 
 
@@ -601,7 +608,7 @@ COPY public.team_members (id, active, role, team_id, user_id) FROM stdin;
 --
 
 COPY public.teams (id, active, code, name) FROM stdin;
-1	t	1	test_team
+1	t	12	ЕКБ офис на Горького
 \.
 
 
@@ -626,15 +633,6 @@ COPY public.ticket_comments (id, created_at, system_comment, text, updated_at, a
 --
 
 COPY public.ticket_history (id, action, comment, created_at, new_value, old_value, performed_by, ticket_id) FROM stdin;
-1	CREATED	Заявка создана пользователем	2026-01-13 15:43:31.836415+05	IN_PROGRESS	\N	1	1
-2	ASSIGNEE_CHANGED	Исполнитель назначен автоматически	2026-01-13 15:43:31.845079+05	executor1@example.com	\N	1	1
-3	STATUS_CHANGED	Заявка взята в работу автоматически	2026-01-13 15:43:31.847099+05	IN_PROGRESS	NEW	1	1
-4	CREATED	Заявка создана пользователем	2026-01-13 15:46:08.193472+05	IN_PROGRESS	\N	1	2
-5	ASSIGNEE_CHANGED	Исполнитель назначен автоматически	2026-01-13 15:46:08.196669+05	executor2@example.com	\N	1	2
-6	STATUS_CHANGED	Заявка взята в работу автоматически	2026-01-13 15:46:08.200245+05	IN_PROGRESS	NEW	1	2
-7	CREATED	Заявка создана пользователем	2026-01-13 15:47:33.365109+05	IN_PROGRESS	\N	1	3
-8	ASSIGNEE_CHANGED	Исполнитель назначен автоматически	2026-01-13 15:47:33.368884+05	aho@example.com	\N	1	3
-9	STATUS_CHANGED	Заявка взята в работу автоматически	2026-01-13 15:47:33.370884+05	IN_PROGRESS	NEW	1	3
 \.
 
 
@@ -643,9 +641,6 @@ COPY public.ticket_history (id, action, comment, created_at, new_value, old_valu
 --
 
 COPY public.tickets (id, created_at, description, location, priority, resolved_at, status, title, updated_at, assignee_id, requester_id, subcategory_id, assigned_team_id, location_id, resolve_breached_at, resolve_due_at) FROM stdin;
-1	2026-01-13 15:43:31.826962+05	В кабинете 301 отпадает потолок	\N	LOW	\N	IN_PROGRESS	Отпадает потолок	2026-01-13 15:43:31.826962+05	2	1	1	1	2	\N	2026-01-15 15:43:31.813704+05
-2	2026-01-13 15:46:08.188302+05	В 7 переговорной  дует с окна	\N	LOW	\N	IN_PROGRESS	Продувает окно	2026-01-13 15:46:08.188302+05	3	1	4	1	2	\N	2026-01-15 15:46:08.179872+05
-3	2026-01-13 15:47:33.362105+05	Замените лампочки	\N	LOW	\N	IN_PROGRESS	Проблемы с освещением	2026-01-13 15:47:33.362105+05	5	1	9	1	2	\N	2026-01-14 15:47:33.356977+05
 \.
 
 
@@ -669,13 +664,13 @@ COPY public.user_roles (user_id, role_id) FROM stdin;
 --
 
 COPY public.users (id, email, enabled, first_name, is_admin, last_name, locked, password_hash, phone, "position", workplace, location_id) FROM stdin;
-1	customer@example.com	t	string	f	string	f	$2a$10$uGNaZwM8ornRbHHYqvrp1ubYKiv3yhaN4uxvvup9ZI3kLN.FCxnVu	\N	\N	\N	\N
-2	executor1@example.com	t	string	f	string	f	$2a$10$cDdHiXdUDOjUY8mPDP9nN.yRCZV52aMeSjrriSUMUiOc28p/F/l/y	\N	\N	\N	\N
-3	executor2@example.com	t	string	f	string	f	$2a$10$DB7nHQgO4bXMkYUZY3gH9.kw2XJoehywZCvU/7r30YCBm/1tf99Eu	\N	\N	\N	\N
-4	executor3@example.com	t	string	f	string	f	$2a$10$iQbT33CGld6uyjg6YsShuOV4r5dWievCgD1ElhfD2hl79Kz000q7S	\N	\N	\N	\N
-5	aho@example.com	t	string	f	string	f	$2a$10$b4JypDZwys7M2iKraqPipOIwmYph6AnWCefr3qpnuCPcRjHbjujqu	\N	\N	\N	\N
-6	supervisor@example.com	t	string	f	string	f	$2a$10$mGLygfpaOAg0KNTSkWAM..wVD5JFngFLHcCGscgUVCRoTXRGt5sCm	\N	\N	\N	\N
 7	system@service-desk	t	string	f	string	f	$2a$10$hrEAAMzLEg5t122Iz1gSiurWEIWl38ir2U/pnBsrK/kiqS06yxX.y	\N	\N	\N	\N
+1	customer@example.com	t	Дмитрий	f	Кузнецов	f	$2a$10$uGNaZwM8ornRbHHYqvrp1ubYKiv3yhaN4uxvvup9ZI3kLN.FCxnVu	89321657891	\N	1	\N
+2	executor1@example.com	t	Илья	f	Попов	f	$2a$10$cDdHiXdUDOjUY8mPDP9nN.yRCZV52aMeSjrriSUMUiOc28p/F/l/y	89223474365	\N	3	\N
+5	aho@example.com	t	Александр	f	Петров	f	$2a$10$b4JypDZwys7M2iKraqPipOIwmYph6AnWCefr3qpnuCPcRjHbjujqu	89341575801	\N	5	\N
+6	supervisor@example.com	t	Владислав	f	Соколов	f	$2a$10$mGLygfpaOAg0KNTSkWAM..wVD5JFngFLHcCGscgUVCRoTXRGt5sCm	89224784338	\N	12	\N
+3	executor2@example.com	t	Виктор	f	Михайлов	f	$2a$10$DB7nHQgO4bXMkYUZY3gH9.kw2XJoehywZCvU/7r30YCBm/1tf99Eu	\N	\N	\N	\N
+4	executor3@example.com	t	Кирилл	f	Иванов	f	$2a$10$iQbT33CGld6uyjg6YsShuOV4r5dWievCgD1ElhfD2hl79Kz000q7S	\N	\N	\N	\N
 \.
 
 
@@ -697,7 +692,7 @@ SELECT pg_catalog.setval('public.locations_id_seq', 1, false);
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: service_desk
 --
 
-SELECT pg_catalog.setval('public.refresh_tokens_id_seq', 5, true);
+SELECT pg_catalog.setval('public.refresh_tokens_id_seq', 12, true);
 
 
 --
@@ -767,14 +762,14 @@ SELECT pg_catalog.setval('public.ticket_comments_id_seq', 1, false);
 -- Name: ticket_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: service_desk
 --
 
-SELECT pg_catalog.setval('public.ticket_history_id_seq', 9, true);
+SELECT pg_catalog.setval('public.ticket_history_id_seq', 19, true);
 
 
 --
 -- Name: tickets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: service_desk
 --
 
-SELECT pg_catalog.setval('public.tickets_id_seq', 3, true);
+SELECT pg_catalog.setval('public.tickets_id_seq', 6, true);
 
 
 --
